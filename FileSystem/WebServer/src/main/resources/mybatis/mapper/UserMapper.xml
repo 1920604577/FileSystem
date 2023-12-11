@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.filesystem.mapper.UserMapper">
+
+    <!-- 用户注册 -->
+    <insert id="userReg" parameterType="com.example.filesystem.pojo.User">
+        insert into
+            user
+        (username,password,name,grade,org)
+        values
+            (#{username},#{password},#{name},#{grade},#{org})
+    </insert>
+
+
+    <!-- 通过id修改用户 -->
+    <update id="userUpdate" parameterType="com.example.filesystem.pojo.User">
+        update user
+        <set>
+            <if test="grade != null and grade != ''">
+                grade = #{grade},
+            </if>
+            <if test="org != null and org != ''">
+                org = #{org},
+            </if>
+        </set>
+            where
+            id=#{id}
+    </update>
+
+
+    <!-- 根据id删除用户 -->
+    <delete id="userDelete" parameterType="java.lang.Long">
+        delete
+        from
+            user
+        where
+            id=#{id}
+    </delete>
+
+    <!-- 用户登录 -->
+    <select id="userAdd" resultType="com.example.filesystem.pojo.User"
+            parameterType="com.example.filesystem.pojo.bo.UserAddBo">
+        select *
+        from user
+        where
+            username = #{username} and
+            status = 0 and
+            del_flag = 0
+            limit 1
+    </select>
+
+    <!-- 根据username查询用户 -->
+    <select id="findByUsername" resultType="com.example.filesystem.pojo.User" parameterType="java.lang.String">
+        select *
+        from user
+        where
+            username=#{username}
+            limit 1
+    </select>
+
+    <!-- 根据id查找用户 -->
+    <select id="userSelect" resultType="com.example.filesystem.pojo.User" parameterType="java.lang.Long">
+        select
+           t1.grade,t1.org
+        from
+            user t1
+        where
+            id=#{id}
+            limit 1
+    </select>
+    <!--查询所有用户的基础信息-->
+    <select id="userFindAll" resultType="com.example.filesystem.pojo.vo.UserFindAllVo">
+        select
+            t1.id,t1.username,t1.name,t1.grade,t1.org
+        from
+            user t1
+        limit 0,15
+    </select>
+    <!--查询所有的分页查询，模糊查询-->
+    <select id="findAllUser" resultType="com.example.filesystem.pojo.vo.UserFindAllVo"
+            parameterType="com.example.filesystem.pojo.bo.UserFindAllBo" >
+        select
+            t1.id,t1.username,t1.name,t1.grade,t1.org
+        from
+            user t1
+        <where>
+            <if test="username != null">
+                username like concat('%',#{username},'%') and
+            </if>
+            <if test="name != null">
+                name like concat('%',#{name},'%') and
+            </if>
+            <if test="grade != null">
+                grade like concat('%',#{grade},'%') and
+            </if>
+            <if test="org != null">
+                org like concat('%',#{org},'%')
+            </if>
+        </where>
+        limit #{start},#{size}
+    </select>
+
+    <!-- 返回用户表中所有数据的个数 -->
+    <select id="selectToGetCount" resultType="java.lang.Integer">
+        select
+        count(*)
+        from
+        user
+        where
+        <if test="username != null">
+            username like concat('%',#{username},'%') and
+        </if>
+        <if test="name != null">
+            name like concat('%',#{name},'%') and
+        </if>
+        <if test="grade != 0">
+            grade like concat('%',#{grade},'%') and
+        </if>
+        <if test="org != null">
+            org like concat('%',#{org},'%')
+        </if>
+    </select>
+    <!--分页获取用户数据集合 -->
+    <select id="userPagingToGetUserData" resultType="com.example.filesystem.pojo.User"
+            parameterType="com.example.filesystem.pojo.bo.UserPagingToGetDataBo">
+        select
+            *
+        from
+        user
+        <where>
+            <if test="name != null and name != ''">
+                name = #{name} and
+            </if>
+        </where>
+            status = #{status} and
+            del_flag = #{delFlag}
+        limit
+            #{start},#{size}
+    </select>
+</mapper>

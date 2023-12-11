@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.filesystem.mapper.FileMapper">
+
+    <insert id="addFile">
+        insert into
+            file
+        values
+            (null,#{serverFileName},#{path},#{size},
+             #{fileStatus},#{role},#{category},#{createBy},
+             #{createTime},#{updateBy},#{updateTime},#{status},
+             #{delFlag})
+    </insert>
+
+    <!--新建文件夹-->
+    <insert id="insertFolder">
+        insert into
+            file (server_filename,path)
+        values
+            (#{serverFilename},#{path})
+    </insert>
+
+    <!-- 移动文件或文件夹 -->
+    <update id="moveFileOrFolder">
+        update
+            file
+        set
+            server_filename = #{serverFilename} ,
+            path = #{path}
+        where
+            id = #{id}
+
+    </update>
+
+    <!-- 重命名文件或文件夹 -->
+    <update id="updateFileOrFolder">
+        update
+            file
+        set
+            server_filename = #{lastName}
+        where
+            server_filename = #{serverFilename}
+    </update>
+
+    <!-- 删除文件或文件夹 -->
+    <delete id="deleteFileOrFolder" parameterType="java.lang.String">
+        delete
+        from
+            file
+        where
+            server_filename = #{serverFilename}
+          and
+            del_flag = 0
+          and
+            status = 0
+    </delete>
+
+    <!-- 查看修改文件的人 -->
+    <select id="selectUpdateByToFile" resultType="com.example.filesystem.pojo.vo.SelectUpdateByToFileVo">
+        select
+            t1.name,t2.update_time
+        from
+            user t1
+                inner join
+            file t2
+            on
+                        t2.server_filename = #{serverFilename}
+                    and
+                        t2.create_by = t1.id
+    </select>
+
+    <!-- 获取file的Path -->
+    <select id="selectToGetPathFile" resultType="java.lang.String">
+        select
+            path
+        from
+            file
+        where
+            server_filename = #{serverFilename}
+        limit 1
+    </select>
+
+    <!-- 显示自己的文件 -->
+    <select id="findOwnFile" resultType="com.example.filesystem.pojo.File">
+        select
+            *
+        from
+            file
+        where
+            create_by = #{createBy}
+        and
+            server_filename like concat(#{filePath},'%')
+    </select>
+
+</mapper>
